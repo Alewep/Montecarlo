@@ -2,7 +2,7 @@
 
 #include <mutex>
 #include <iostream>
-#include "../jeu.h"
+//#include "../jeu.h"
 
 /*****************************************************************************************************
  *      Toutes les classes implantant les divers joueurs doivent hériter de cette classe             *

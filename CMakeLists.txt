@@ -12,11 +12,13 @@ add_compile_options(-Wall -Wpedantic)
 
 
 set(SRCS
+    arbre/arbre.cpp
     joueur.cpp
     joueur_montecarlo_.cpp
     )
     
 set(HEADERS
+    arbre/arbre.h
     joueur.h
     joueur_montecarlo_.h
     )

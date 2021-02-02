@@ -1,0 +1,5 @@
+cmake_minimum_required(VERSION 3.5)
+
+project(untitled1 LANGUAGES C)
+
+add_executable(untitled1 main.c)
