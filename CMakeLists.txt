@@ -10,18 +10,18 @@ set(CMAKE_CXX_STANDARD_REQUIRED on)
 set(CMAKE_CXX_EXTENSIONS off)
 add_compile_options(-Wall -Wpedantic)
 
+include_directories(arbre)
+add_subdirectory(arbre)
 
 set(SRCS
-    arbre/arbre.cpp
     joueur.cpp
     joueur_montecarlo_.cpp
     )
     
 set(HEADERS
-    arbre/arbre.h
     joueur.h
     joueur_montecarlo_.h
     )
 
 add_library(joueurs ${SRCS} ${HEADERS})
-target_link_libraries(${PROJECT_NAME} ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(${PROJECT_NAME} ${CMAKE_THREAD_LIBS_INIT} arbre)

@@ -1,0 +1,4 @@
+
+fonction sur les arbres pour optimisé le chargement dechargement.
+ - ordre sur les coups
+ 
