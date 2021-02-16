@@ -2,12 +2,8 @@
 
 
 
-Binarytree::Node::Node(int val)
-{
-    _val = val;
-    _right = nullptr;
-    _left = nullptr;
-}
+Binarytree::Node::Node(int val,Brix coup) : _val(val),_coup(coup),_right(nullptr),_left(nullptr) {}
+
 
 void Binarytree::Node::setVal(int val)
 {
@@ -22,14 +18,19 @@ int Binarytree::Node::getVal()
 
 Binarytree::Node &Binarytree::Node::getRight()
 {
-    if (rightIsNull()) _right = new Node(0);
+    if (rightIsNull()) _right = new Node(0,Brix ());
     return *_right;
 }
 
 Binarytree::Node &Binarytree::Node::getLeft()
 {
-    if (leftIsNull()) _left = new Node(0);
+    if (leftIsNull()) _left = new Node(0,Brix ());
     return *_left;
+}
+
+Brix &Binarytree::Node::getCoup()
+{
+    return _coup;
 }
 
 bool Binarytree::Node::rightIsNull()
@@ -47,9 +48,9 @@ Binarytree::Binarytree()
     _root = nullptr;
 }
 
-Binarytree::Binarytree(int val)
+Binarytree::Binarytree(int val,Brix coup)
 {
-    _root = new Node (val);
+    _root = new Node (val,coup);
 }
 
 Binarytree::~Binarytree()
@@ -74,7 +75,7 @@ Binarytree::~Binarytree()
 
 Binarytree::Node &Binarytree::getNode()
 {
-    if (isnull()) _root = new Node(0);
+    if (isnull()) _root = new Node(0,Brix());
     return *_root;
 }
 

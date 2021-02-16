@@ -1,8 +1,12 @@
 #include "narytree.h"
 
-Narytree::Node::Node(int val) : _val(val),_father(nullptr) {}
 
-Narytree::Node::Node(int val, Node &father) : _val(val),_father(&father) {}
+
+Narytree::Node::Node(int val, const Brix &coup) : _val(val),_coup(coup) {}
+
+Narytree::Node::Node(int val, const Brix &coup, Narytree::Node &father)  : _val(val),_coup(coup),_father(&father) {}
+
+
 
 bool Narytree::Node::isaleaf() const
 {
@@ -24,20 +28,20 @@ Narytree::Node &Narytree::Node::getNode(size_t i)
     return *_sons.at(i);
 }
 
-size_t Narytree::Node::numberOfsons()
+size_t Narytree::Node::numberOfsons() const
 {
     return _sons.size();
 }
 
 Narytree::Node &Narytree::Node::getFather()
 {
-    if(!havefather()) _father = new Node (0);
+    if(!havefather()) _father = new Node (0,Brix());
     return *_father;
 }
 
-void Narytree::Node::addNode(int val)
+void Narytree::Node::addNode(int val, Brix coup)
 {
-    _sons.push_back(new Node(val));
+    _sons.push_back(new Node(val, coup));
 
 }
 
@@ -45,7 +49,7 @@ void Narytree::Node::addNode(int val)
 
 
 
-Narytree::Narytree(int val) :_root ( new Node(val)) {}
+Narytree::Narytree(int val, Brix coup ) :_root ( new Node(val, coup ) ) {}
 
 
 Narytree::~Narytree()
@@ -71,7 +75,7 @@ Narytree::~Narytree()
 
 Narytree::Node &Narytree::getNode()
 {
-    if(isnull()) _root = new Node (0);
+    if(isnull()) _root = new Node (0,Brix());
     return *_root;
 }
 
