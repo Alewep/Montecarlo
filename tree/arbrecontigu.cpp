@@ -5,15 +5,16 @@ ArbreContigu::ArbreContigu(const std::string &filename)
     values = file_to_vector(filename);
 }
 
-
-std::vector<std::string> Arbrecontigu::explode(const std::string & str, char x){
-   std::vector<string> result;
-   std::istringstream in(str);
-   std::string token;
-   while(getline(in, token, x))
-       result.push_back(token);
-   return result;
+std::vector<std::string> ArbreContigu::explode(const std::string &str, char x)
+{
+    std::vector<std::string> result;
+    std::istringstream in(str);
+    std::string token;
+    while(getline(in, token, x))
+        result.push_back(token);
+    return result;
 }
+
 
 
 std::vector<element> ArbreContigu::file_to_vector(const std::string &filename)
@@ -30,28 +31,33 @@ std::vector<element> ArbreContigu::file_to_vector(const std::string &filename)
             if (vect_temp.size() == 1)
                 elem.isnull = true;
             else {
-                elem.isnull = vect_temp[0];
-                elem.value = vect_temp[1];
-                elem.b.setAx(vect_temp[2]);
-                elem.b.setOx(vect_temp[3]);
-                elem.b.setAo(vect_temp[4]);
-                elem.b.setOo(vect_temp[5]);
-                elem.b.setDefinie(vect_temp[6]);
-            }        
+                elem.isnull = false;
+                elem.value = std::stoi(vect_temp[1]);
+                elem.brix.setAx(std::stoi(vect_temp[2]));
+                elem.brix.setOx(std::stoi(vect_temp[3]));
+                elem.brix.setAo(std::stoi(vect_temp[4]));
+                elem.brix.setOo(std::stoi(vect_temp[5]));
+                elem.brix.setDefinie(vect_temp[6]=="1" ? 1 : 0);
+            }
             values.push_back(elem);
               }
         }
-     }
+
         file.close();
         return values;
 }
 
-void ArbreContigu::to_csv(element const & e,std::string const & filename){
-    std::ofstream file(filename, ios::app);
+void ArbreContigu::to_csv(std::string const & filename){
+    std::ofstream file(filename, std::ios::app);
     if(!file){
         std::cout << "Impossible d'ouvrir le fichier !" << std::endl;}
     else {
-        file << e.isnull << ";"<< e.value << ";" << e.b.getAx() << ";" << e.b.getOx() << ";" << e.b.getAo() << ";" << e.b.getOo() << ";" << e.b.getDefinie() << std::endl;
+        for (auto elements : values){
+            if (elements.isnull)
+                file << "N;" << std::endl;
+            else
+            file << elements.isnull << ";"<< elements.value << ";" << elements.brix.getAx() << ";" << elements.brix.getOx() << ";" << elements.brix.getAo() << ";" << elements.brix.getOo() << ";" <<elements.brix.getDefinie() << std::endl;
+        }
+
               }
 }
-
