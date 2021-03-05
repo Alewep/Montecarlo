@@ -64,10 +64,8 @@ public:
      * @param player1
      * @param player2
      * @param nombre_parties
-     */
-    Arbitre(player player1 , player player2, int nombre_parties);
-
-
+   zd  */
+    Arbitre(player player1,player player2,int nombre_parties);
     void initialisation();
 
 

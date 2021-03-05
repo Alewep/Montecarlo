@@ -19,8 +19,6 @@ class Joueur
     std::string _nom;   //nom du joueur
     bool _joueur;       //joueur 1 : true (qui commence) , joueur 2 : false (qui joue en deuxieme)
 
-
-
 public:
     /**
      * @brief Joueur

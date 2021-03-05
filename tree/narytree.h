@@ -5,45 +5,57 @@
 #include <queue>
 class Narytree
 {
-private:
+
 public:
     class Node
     {
     private:
         int _val;
+        int _iterations;
         Brix _coup;
         Node  *_father;
         std::vector<Node *> _sons;
     public:
-        Node(int val,Brix const& coup);
-        Node (int val,Brix const& coup,Node &father);
+        Node(int val,int iterations, Brix const& coup);
+        Node (int val,int iterations, Brix const& coup,Node &father);
         Node(Node const& node) = delete;
         ~Node() {}
         bool isaleaf() const;
         bool havefather() const ;
         int getVal() const;
+        int getIterations () const;
         Brix getCoup() const ;
-        void setVal();
-        void setCoup();
-        
+        void setVal( int val);
+        void setCoup(Brix coup);
+        void setIterations(int iterations);
+        void setFather (Node &father);
+        Node &get();
+        const Node &getConst() const;
+        void set(int val,int iterations,Brix coup);
         Node &getNode (size_t i);
+        const Node &getNodeConst (size_t i) const;
         size_t numberOfsons () const ;
-        Node &getFather() ;
-        void addNode(int val, Brix coup);
+        Node &getFather();
+        void addNode(int val, int iterations,Brix coup);
+        void addNode (int val,int iterations,Brix coup,Node &father);
 
-        int getVal();
+
+
     };
 
-    Node *_root;
+private:
+      Node *_root;
 public:
     Narytree();
-    Narytree(int val, Brix coup);
+    Narytree(int val,int iterations, Brix coup);
     Narytree(Narytree const& n) = delete;
     Narytree(Binarytree const& bin); // à définir
     ~Narytree();
     Node &getNode();
-    bool isnull();
-
+    const Node &getNodeConst() const;
+    void setNode(int val,int iterations, Brix coup);
+    bool isnull() const;
+    void prefixe() const;
 };
 
 #endif // NARYTREE_H

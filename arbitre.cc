@@ -144,11 +144,11 @@ result Arbitre::partie()
                     !_jeu.coup_licite(_coups[_numero_partie-1],tour))
                 {
                     if(_jeu.partie_nulle())
-                        {
-                            std::cout << "partie nulle (" << tour << ")" << std::endl;
+                        { std::cout << "partie nulle (" << tour << ")" << std::endl;
                             return result::NULLE;
                         }
                     if(tour%2)
+
                         {
                             std::cout << _joueur2->nom() <<" gagne ! Nombre de tours : " << tour << std::endl;
                             return result::O; // joueur jouant en 2eme gagne

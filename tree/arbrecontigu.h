@@ -11,6 +11,7 @@
 
 struct element{
     int value;
+    int iterations;
     bool isnull;
     Brix brix;
 };
@@ -18,14 +19,14 @@ struct element{
 class ArbreContigu
 {
 private:
-    std::vector<element> values;
     std::vector<element> file_to_vector(const std::string & filename);
     std::vector<std::string> explode(const std::string & str, char x);
 
 public:
+    std::vector<element> values;
     ArbreContigu(const std::string & filename);
     ArbreContigu(Binarytree const& b); // a définir (! sans recursivité)
-    std::vector<element> getvalues() {return values;}
+    std::vector<element> getvalues() const {return values;}
     void to_csv(std::string const & filename);
 
 };
