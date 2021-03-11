@@ -23,7 +23,25 @@ void Joueur_MonteCarlo_::savetree()
 */
 void Joueur_MonteCarlo_::recherche_coup(Jeu jeu, Brix &coup)
 {
+    Brix coupAdverse = getBrixJouer(etat(*_courant),jeu);
+    if (coupAdverse.bienformee()) {
+        Brix coupCourant;
+        for (size_t i = 0;i< _courant->numberOfsons();++i) {
+            Brix coupCourant = _courant->getNode(i).getCoup() ;
+            if (egalBrix(coupAdverse,coupCourant))
+                _courant = & _courant->getNode(i);
+        }
+        if (!egalBrix(coupAdverse,coupCourant)) {}
 
+    }
+
+    using std::chrono::high_resolution_clock;
+}
+
+bool Joueur_MonteCarlo_::egalBrix(Brix a, Brix b)
+{
+    return (a.getAo() ==  b.getAo()) && (a.getAx() == b.getAx())
+            && (a.getOo() == b.getOo()) && (a.getOx() == b.getOx());
 }
 
 Brix Joueur_MonteCarlo_::getBrixJouer(Jeu fils, Jeu pere)
@@ -132,12 +150,7 @@ bool Joueur_MonteCarlo_::coupvisite(Brix b, Narytree::Node &node)
 {
     for (size_t i = 0;i<node.numberOfsons();++i)
     {
-        if (
-            b.getAo() == node.getNode(i).getCoup().getAo() &&
-            b.getAx() == node.getNode(i).getCoup().getAx() &&
-            b.getOo() == node.getNode(i).getCoup().getOo() &&
-            b.getOx() == node.getNode(i).getCoup().getOx()
-        ) return true;
+        if (egalBrix(b,node.getNode(i).getCoup())) return true;
     }
     return false;
 }

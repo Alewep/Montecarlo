@@ -5,6 +5,7 @@
 #include "joueur.hh"
 #include "narytree.h"
 #include "arbrecontigu.h"
+#include "../arbitre.hh"
 #include <fstream>
 #include <math.h>
 #include <stack>
@@ -14,7 +15,7 @@ class Joueur_MonteCarlo_ : public Joueur
 {
 private:
     Narytree _tree;
-    Narytree::Node &_courant;
+    Narytree::Node * _courant;
 
 public:
     const static double PONDERATION;
@@ -23,6 +24,7 @@ public:
 
     //char nom_abbrege() const override;
     void recherche_coup(Jeu j, Brix & coup) override;
+    static bool egalBrix (Brix a, Brix b);
     static Brix getBrixJouer(Jeu fils, Jeu pere);
     static double uperboundconfidence(Narytree::Node& node); // calcule l'uperboundconfidence d'un noeud
     static Jeu etat (const Narytree::Node& node); // renvoie le plateau du jeux correspondant au noeud

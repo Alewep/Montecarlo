@@ -229,3 +229,78 @@ void Binarytree::prefixe() const
     }
 }
 
+size_t Binarytree::hauteur() const
+{
+    size_t maxhauteur = 0;
+    if (!isnull()) {
+        std::queue<Node *> q;
+        std::queue<size_t> qh;
+        q.push(_root);
+        qh.push(0);
+        while(!q.empty())
+        {
+            Node *node = q.front();
+            size_t haut = qh.front();
+            q.pop();
+            qh.pop();
+            ++haut ;
+            if (!node->leftIsNull()) {
+                qh.push(haut);
+                q.push(&node->getLeft());
+            }
+            if (!node->rightIsNull()) {
+                qh.push(haut);
+                q.push(&node->getRight());
+
+            }
+
+            if (node->rightIsNull() && node->leftIsNull()) {
+                if (haut > maxhauteur) maxhauteur = haut;
+            }
+
+        }
+        return maxhauteur-1;
+
+
+    }
+    return 0;
+
+}
+
+size_t Binarytree::dernierecouche() const
+{
+    size_t maxhauteur = 0;
+    if (!isnull()) {
+        std::queue<Node *> q;
+        std::queue<size_t> qh;
+        q.push(_root);
+        qh.push(0);
+        while(!q.empty())
+        {
+            Node *node = q.front();
+            size_t haut = qh.front();
+            q.pop();
+            qh.pop();
+            ++haut ;
+            if (!node->leftIsNull()) {
+                qh.push(haut);
+                q.push(&node->getLeft());
+            }
+            if (!node->rightIsNull()) {
+                qh.push(haut);
+                q.push(&node->getRight());
+
+            }
+
+            if (node->rightIsNull() && node->leftIsNull()) {
+                if (haut > maxhauteur) maxhauteur = haut;
+            }
+
+        }
+        return maxhauteur-1;
+
+
+    }
+    return 0;
+}
+

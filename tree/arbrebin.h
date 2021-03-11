@@ -37,7 +37,7 @@ public :
         bool leftIsNull() const;
         int getIterations() const;
         void setIterations(int iterations);
-        void hauteur();
+
     };
 private:
     Node *_root;
@@ -52,6 +52,8 @@ public:
     const Node &getNodeConst() const;
     bool isnull() const;
     void prefixe () const; // à definir lecture du l'arbre celon l'ordre prefixe (sans recursivité)
+    size_t hauteur() const;
+    size_t dernierecouche() const;
 };
 
 

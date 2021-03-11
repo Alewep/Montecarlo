@@ -6,6 +6,7 @@
 #include <fstream>
 #include <cstdlib>
 #include <sstream>
+#include <math.h>
 #include "arbrebin.h"
 #include "../brix.hh"
 

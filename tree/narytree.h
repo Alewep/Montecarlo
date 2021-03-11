@@ -59,6 +59,7 @@ public:
     bool isnull() const;
     void prefixe() const;
     void toCsv (std::string filename) const;
+
 };
 
 #endif // NARYTREE_H

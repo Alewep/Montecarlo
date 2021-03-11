@@ -214,7 +214,11 @@ void Narytree::prefixe() const
 
 void Narytree::toCsv(std::string filename) const
 {
-    ArbreContigu c (*this);
+
+    Binarytree b (*this);
+    this->~Narytree();
+    std::cout<<b.hauteur()<<std::endl;
+    ArbreContigu c (b);
     c.to_csv(filename);
 }
 

@@ -9,10 +9,10 @@
 
 int main()
 {
-    std::srand(std::time(nullptr));
+    //std::srand(std::time(nullptr));
     Joueur_MonteCarlo_ j("Alex",true);
     size_t i = 0;
-    while (i< 10000)
+    while (i< 10)
     {
       j.montecarlo();
       ++i;
@@ -20,8 +20,18 @@ int main()
     std::cout<<"montecarlo...succes !"<<std::endl;
     j.savetree();
 
+//    Binarytree b1(1,0,Brix(0,0,0,0));
+//    b1.getNode().setLeft(2,0,Brix(0,0,0,0));
+//    b1.getNode().getLeft().setLeft(3,0,Brix(0,0,0,0));
+
+//    b1.getNode().getLeft().setRight(4,0,Brix(0,0,0,0));
+//    b1.getNode().getLeft().getRight().setRight(5,0,Brix(0,0,0,0));
+
+//    std::cout<<b1.hauteur()<<std::endl;
 
 
+//    ArbreContigu c(b1);
+//    c.to_csv("toto");
 
 
 
