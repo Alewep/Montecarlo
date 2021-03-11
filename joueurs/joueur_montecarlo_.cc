@@ -1,10 +1,17 @@
 #include "joueur_montecarlo_.hh"
-
+const double Joueur_MonteCarlo_::PONDERATION(2.0);
 
 Joueur_MonteCarlo_::Joueur_MonteCarlo_(std::string nom, bool joueur)
-    :Joueur(nom,joueur),_tree(0,0,Brix()),_courant(_tree.getNode())
-{
+    :Joueur(nom,joueur),_tree(ArbreContigu("tree_montecarlo_OAA.txt")),_courant(_tree.getNode()) {
 
+    std::cout<<"succes..."<<std::endl;
+}
+
+void Joueur_MonteCarlo_::savetree()
+{
+    _tree.prefixe();
+    _tree.toCsv("tree_montecarlo_OAA.txt");
+    std::cout<<"done";
 }
 
 
@@ -24,9 +31,7 @@ Brix Joueur_MonteCarlo_::getBrixJouer(Jeu fils, Jeu pere)
     for(size_t i=0;i<MAX_LARGEUR;++i){
         for(size_t j=0;j<MAX_HAUTEUR;++j) {
             if((fils.plateau()[j][i] != pere.plateau()[j][i]) && pere.plateau()[j][i] == '0' ) {
-                std::cout<<"enter"<<std::endl;
                 if(fils.plateau()[j][i] == 'o') {
-                    std::cout<<"OO";
                     if (( j > 0 ) && (fils.plateau()[j-1][i] != pere.plateau()[j-1][i]) && (fils.plateau()[j-1][i] == 'x') && pere.plateau()[j-1][i] == '0' )
                         return Brix(static_cast<int>(i),static_cast<int>(j-1),static_cast<int>(i),static_cast<int>(j));
 
@@ -41,7 +46,6 @@ Brix Joueur_MonteCarlo_::getBrixJouer(Jeu fils, Jeu pere)
                     return Brix();
                 }
                 if (fils.plateau()[j][i] == 'x') {
-                    std::cout<<"OO";
                     if (( j > 0 ) && (fils.plateau()[j-1][i] != pere.plateau()[j-1][i]) && (fils.plateau()[j-1][i] == 'o') && pere.plateau()[j-1][i] == '0' )
                         return Brix(static_cast<int>(i),static_cast<int>(j),static_cast<int>(i),static_cast<int>(j-1));
 
@@ -62,13 +66,20 @@ Brix Joueur_MonteCarlo_::getBrixJouer(Jeu fils, Jeu pere)
     return Brix();
 }
 
-Jeu Joueur_MonteCarlo_::etat(Narytree::Node &node)
+
+double Joueur_MonteCarlo_::uperboundconfidence(Narytree::Node &node)
+{
+   if(node.getIterations()) return (node.getVal()/node.getIterations()) + sqrt(PONDERATION*(log(node.getFather().getVal())/node.getIterations()));
+   else return DBL_MAX;
+}
+
+Jeu Joueur_MonteCarlo_::etat( const Narytree::Node &node)
 {
     Jeu etat;
-    Narytree::Node& noeudCourant(node);
-    while(node.havefather()) {
+    const Narytree::Node * noeudCourant = &node;
+    while(noeudCourant->havefather()) {
         etat.joue(node.getCoup());
-        noeudCourant = noeudCourant.getFather();
+        noeudCourant = &noeudCourant->getFatherConst();
     }
     return etat;
 }
@@ -117,27 +128,127 @@ std::vector<Brix> Joueur_MonteCarlo_::coupspossible(Jeu jeu)
     return coupValide;
 }
 
-std::vector<Brix> Joueur_MonteCarlo_::coupsnonvisite(Jeu jeu, Narytree::Node &node)
+bool Joueur_MonteCarlo_::coupvisite(Brix b, Narytree::Node &node)
 {
-    std::vector<Brix> coupValide = coupspossible(jeu);
-    std::vector<Brix> coupnonvisite;
-    for (Brix & e : coupValide) {
-        size_t i=0;
-        Brix b = node.getNode(0).getCoup();
-       while((i<node.numberOfsons()) &&
-             ((e.getAo() != b.getAo()) || (e.getAx()!=b.getAx()) || (e.getOo() != b.getOo()) || (e.getOx() != b.getOx())))
-        {
-                coupnonvisite.push_back(e);
-                ++i;
-                b = node.getNode(i).getCoup();
-        }
-       if ((e.getAo() != b.getAo()) || (e.getAx()!=b.getAx()) || (e.getOo() != b.getOo()) || (e.getOx() != b.getOx()))
-       {
-           coupnonvisite.push_back(e);
-       }
+    for (size_t i = 0;i<node.numberOfsons();++i)
+    {
+        if (
+            b.getAo() == node.getNode(i).getCoup().getAo() &&
+            b.getAx() == node.getNode(i).getCoup().getAx() &&
+            b.getOo() == node.getNode(i).getCoup().getOo() &&
+            b.getOx() == node.getNode(i).getCoup().getOx()
+        ) return true;
     }
-    return coupnonvisite;
+    return false;
 }
+
+std::vector<Brix> Joueur_MonteCarlo_::coupsnonvisites(Narytree::Node &node)
+{
+    std::vector<Brix> coupValide = coupspossible(etat(node));
+    std::vector<Brix> coupnonvisite;
+    if ( node.numberOfsons() != 0) {
+        for (Brix & e : coupValide) {
+           if(!coupvisite(e,node)) coupnonvisite.push_back(e);
+        }
+        return coupnonvisite;
+    }
+    return coupValide;
+}
+
+Narytree::Node& Joueur_MonteCarlo_::maxUBC(Narytree::Node& node) // renvoie parmi les fils du noeud appelé celui qui maximise UBC
+{
+    Narytree::Node * current_node = & node;
+    Narytree::Node * best_child =&current_node->getNode(0);
+    double max = uperboundconfidence(*best_child);
+    for (size_t i=1;i<current_node->numberOfsons();i++)
+    {
+        double calcl = uperboundconfidence(current_node->getNode(i));
+        if(calcl>max)
+        {
+            best_child = &current_node->getNode(i);
+            max = calcl;
+
+        }
+        else if (abs(calcl - max) > 0.000001)
+        {
+           int choix = rand() % 1;
+           if (choix == 0) {
+               best_child = &current_node->getNode(i);
+               max = calcl;
+           }
+        }
+    }
+    return *best_child;
+}
+
+
+Narytree::Node& Joueur_MonteCarlo_::descent(Narytree::Node& node)
+{
+    Narytree::Node * current_node =&node;
+    while ((coupsnonvisites(*current_node).empty()) && (current_node->numberOfsons()>0))
+        current_node = &maxUBC(*current_node);
+
+    return *current_node;
+}
+
+Narytree::Node &Joueur_MonteCarlo_::growth(Narytree::Node &node)
+{
+    // creer un nouveau noeud parmis les succeur de l'etat etiquetant la feuille
+    std::vector<Brix> cnv = coupsnonvisites(node);
+    if (!cnv.empty())
+    {
+        size_t rand_int;
+        if (cnv.size() != 1) rand_int = static_cast<size_t>(rand () % static_cast<int>(cnv.size() - 1) + 0);
+        else rand_int = 0;
+        node.addNode(0,0,cnv[rand_int],node);
+        return node.getNode(node.numberOfsons()-1);
+    }
+    return node;
+}
+
+int Joueur_MonteCarlo_::rollout(Narytree::Node &node)
+{
+
+    Jeu current_game = etat(node);
+    std::vector<Brix> cp = coupspossible(current_game);
+    while (!current_game.fini() && !cp.empty()){
+
+        size_t rand_int = static_cast<size_t>(rand() % static_cast<int>(cp.size() - 1) + 0); // coupspossible.size() >= 1 car partie non finie
+        current_game.joue(cp[rand_int]);
+         std::vector<Brix> cp = coupspossible(current_game);
+    }
+    if (current_game.partie_X()) //on choisit arbitrairement +1 pour les croix et -1 pour O
+        return  1;
+    if (current_game.partie_O())
+        return -1;
+    if (current_game.partie_nulle())
+        return 0;
+    return 0;
+}
+
+void Joueur_MonteCarlo_::update(Narytree::Node &node, int val)
+{
+    Narytree::Node * nodeCourant = &node;
+    while(nodeCourant->havefather()){
+        nodeCourant->setIterations(nodeCourant->getIterations()+1);
+        nodeCourant->setVal(nodeCourant->getVal()+val);
+        nodeCourant = &nodeCourant->getFather();
+    }
+    //modification racine
+    nodeCourant->setIterations(nodeCourant->getIterations()+1);
+    nodeCourant->setVal(nodeCourant->getVal()+val);
+}
+
+void Joueur_MonteCarlo_::montecarlo()
+{
+    //std::cout<<"test"<<std::endl;
+    Narytree::Node& des = descent(_courant);
+    Narytree::Node& gro = growth(des);
+    int res = rollout(gro);
+    update(gro,res);
+}
+
+
 
 
 

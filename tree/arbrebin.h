@@ -52,6 +52,7 @@ public:
     const Node &getNodeConst() const;
     bool isnull() const;
     void prefixe () const; // à definir lecture du l'arbre celon l'ordre prefixe (sans recursivité)
+    size_t numberofnodes() const;
 };
 
 

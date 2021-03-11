@@ -2,6 +2,7 @@
 #define NARYTREE_H
 #include <vector>
 #include "arbrebin.h"
+#include "arbrecontigu.h"
 #include <queue>
 class Narytree
 {
@@ -36,6 +37,7 @@ public:
         const Node &getNodeConst (size_t i) const;
         size_t numberOfsons () const ;
         Node &getFather();
+        const Node& getFatherConst() const;
         void addNode(int val, int iterations,Brix coup);
         void addNode (int val,int iterations,Brix coup,Node &father);
 
@@ -56,6 +58,8 @@ public:
     void setNode(int val,int iterations, Brix coup);
     bool isnull() const;
     void prefixe() const;
+    void toCsv (std::string filename) const;
+    size_t numberofnodes ();
 };
 
 #endif // NARYTREE_H

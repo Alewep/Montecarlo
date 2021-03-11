@@ -68,7 +68,8 @@ std::vector<element> ArbreContigu::file_to_vector(const std::string &filename)
             std::vector<std::string> vect_temp = explode(line,';');
             if (vect_temp.size() == 1)
                 elem.isnull = true;
-            else {
+            else
+            {
                 elem.isnull = false;
                 elem.value = std::stoi(vect_temp[0]);
                 elem.iterations = std::stoi(vect_temp[1]);
@@ -79,8 +80,8 @@ std::vector<element> ArbreContigu::file_to_vector(const std::string &filename)
                 elem.brix.setDefinie(vect_temp[6]=="1" ? true : false);
             }
             values.push_back(elem);
-              }
-        }
+       }
+   }
 
         file.close();
         return values;
@@ -95,7 +96,7 @@ void ArbreContigu::to_csv(std::string const & filename){
         for (auto elements : values){
 
             if (elements.isnull)
-                file << "N;" << std::endl;
+                file << "N" << std::endl;
             else {
                 file << elements.value << ";"
                 << elements.iterations << ";"

@@ -92,15 +92,43 @@ Narytree::Node &Narytree::Node::getFather()
     return *_father;
 }
 
+const Narytree::Node &Narytree::Node::getFatherConst() const
+{
+    return *_father;
+}
+
 void Narytree::Node::addNode(int val,int iterations, Brix coup)
 {
-    _sons.push_back(new Node(val,iterations,coup));
+    _sons.push_back(new Node(val,iterations,coup,*this));
 
 }
 
 void Narytree::Node::addNode(int val, int iterations, Brix coup, Narytree::Node &father)
 {
     _sons.push_back(new Node(val,iterations,coup,father));
+}
+
+size_t Narytree::numberofnodes()
+{
+    size_t numberofnodes = 0;
+    if (!isnull()) {
+        std::queue<Node *> q;
+        q.push(_root);
+        _root = nullptr;
+        while (!q.empty()) {
+            Node *node = q.front();
+            q.pop();
+            if(!node->isaleaf()) {
+                for(size_t i = 0;i<node->numberOfsons();++i)
+                {
+                    q.push(&node->getNode(i));
+                }
+            }
+            ++numberofnodes;
+
+        }
+    }
+    return numberofnodes;
 }
 
 
@@ -121,21 +149,20 @@ Narytree::Narytree(Binarytree const &bin)
         qb.push(&bin.getNodeConst());
         _root = new Node(bin.getNodeConst().getVal(),bin.getNodeConst().getIterations(),bin.getNodeConst().getCoup());
         qn.push(_root);
-
         while(!qb.empty()) {
-            const Binarytree::Node &nb = *qb.front();
+            const Binarytree::Node * nb = qb.front();
             qb.pop();
             Node *nn = qn.front();
             qn.pop();
-            if(!nb.leftIsNull()) {
-                qb.push(&nb.getLeftConst());
-                nn->addNode(nb.getLeftConst().getVal(),nb.getLeftConst().getIterations(),nb.getLeftConst().getCoup(),*nn);
-                qn.push(&nn->getNode(nn->numberOfsons()-1));
+            if(!nb->leftIsNull()) {
+                qb.push(&nb->getLeftConst());
+                nn->addNode(nb->getLeftConst().getVal(),nb->getIterations(),nb->getLeftConst().getCoup(),*nn);
+                qn.push(&nn->getNode(0));
             }
-            if(!nb.rightIsNull()) {
-                qb.push(&nb.getRightConst());
-                nn->addNode(nb.getRightConst().getVal(),nb.getIterations(),nb.getRightConst().getCoup(),*nn);
-                qn.push(&nn->getNode(nn->numberOfsons()-1));
+            if(!nb->rightIsNull()) {
+                qb.push(&nb->getRightConst());
+                nn->getFather().addNode(nb->getRightConst().getVal(),nb->getRightConst().getIterations(),nb->getRightConst().getCoup(),nn->getFather());
+                qn.push(&nn->getFather().getNode(nn->getFather().numberOfsons()-1));
             }
 
         }
@@ -169,7 +196,7 @@ Narytree::~Narytree()
 
 Narytree::Node &Narytree::getNode()
 {
-    if(isnull()) _root = new Node (0,0,Brix());
+    //if(isnull()) _root = new Node (0,0,Brix());
     return *_root;
 }
 
@@ -205,7 +232,17 @@ void Narytree::prefixe() const
                     q.push(&node->getNode(i));
                 }
             }
+            if (node->havefather())
+                std::cout<<node->getFather().getVal()<<"f";
             std::cout<<node->getVal()<<std::endl;
         }
     }
 }
+
+void Narytree::toCsv(std::string filename) const
+{
+    ArbreContigu c (*this);
+    c.to_csv(filename);
+}
+
+

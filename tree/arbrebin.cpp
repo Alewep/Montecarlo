@@ -113,14 +113,12 @@ Binarytree::Binarytree(const ArbreContigu &a)
             std::size_t i = qi.front();
             q.pop();
             qi.pop();
-            std::cout<<values[(i+1)*2-1].isnull<<std::endl;
-            if(!values[(i+1)*2-1].isnull && (i+1)*2-1 < values.size()) {
+            if((i+1)*2-1 < values.size() && !values[(i+1)*2-1].isnull) {
 
                 node->setLeft(values[(i+1)*2-1].value,values[(i+1)*2-1].iterations, values[(i+1)*2-1].brix);
                 q.push(&node->getLeft());
                 qi.push((i+1)*2-1);
             }
-            std::cout<<values[(i+1)*2].isnull<<"i"<<std::endl;
             if((i+1)*2 < values.size() && !values[(i+1)*2].isnull) {
                 node->setRight(values[(i+1)*2].value,values[(i+1)*2].iterations, values[(i+1)*2].brix);
                 q.push(&node->getRight());
@@ -141,23 +139,29 @@ Binarytree::Binarytree(const Narytree &n)
         qb.push(_root);
         qn.push(&n.getNodeConst());
         while(!qn.empty()) {
-            const Narytree::Node &nodeN = *qn.front();
+            const Narytree::Node * nodeN = qn.front();
             qn.pop();
             Node * nodeB = qb.front();
             qb.pop();
 
-            if ( ! nodeN.isaleaf() ) {
-                nodeB->setLeft(nodeN.getNodeConst(0).getVal(),nodeN.getIterations(),nodeN.getNodeConst(0).getCoup());
-                for(std::size_t i=1; i<nodeN.numberOfsons(); i++) {
+            if(!nodeN->isaleaf()) {
+                nodeB->setLeft(nodeN->getNodeConst(0).getVal(),nodeN->getIterations(),nodeN->getNodeConst(0).getCoup());
+                if(!nodeN->getNodeConst(0).isaleaf()) {
+                    qb.push(&nodeB->getLeft());
+                    qn.push(&nodeN->getNodeConst(0));
+                }
 
-                    nodeB->setRight(nodeN.getNodeConst(i).getVal(),nodeN.getNodeConst(i).getIterations(),nodeN.getNodeConst(i).getCoup());
-                    if(!nodeN.getNodeConst(i).isaleaf()) {
-                        qb.push(&nodeB->getLeft());
-                        qn.push(&nodeN.getNodeConst(i));
+                nodeB = &nodeB->getLeft();
+                for(std::size_t i=1; i<nodeN->numberOfsons(); i++) {
+                    nodeB->setRight(nodeN->getNodeConst(i).getVal(),nodeN->getNodeConst(i).getIterations(),nodeN->getNodeConst(i).getCoup());
+                    if(!nodeN->getNodeConst(i).isaleaf()) {
+                        qb.push(&nodeB->getRight());
+                        qn.push(&nodeN->getNodeConst(i));
                     }
-                    nodeB = &nodeB->getRight();
+                    nodeB = &(nodeB->getRight());
                 }
            }
+
 
         }
     }
@@ -223,4 +227,25 @@ void Binarytree::prefixe() const
         std::cout<<std::endl;
 
     }
+}
+
+size_t Binarytree::numberofnodes() const
+{
+    size_t numberofnodes = 0;
+    if (!isnull()) {
+        std::queue<Node *> q;
+        q.push(_root);
+        while(!q.empty())
+        {
+            Node *node = q.front();
+            q.pop();
+            if (!node->leftIsNull())
+                q.push(&node->getLeft());
+            if (!node->rightIsNull())
+                q.push(&node->getRight());
+            ++numberofnodes;
+        }
+
+    }
+    return numberofnodes;
 }
