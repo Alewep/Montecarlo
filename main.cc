@@ -10,13 +10,17 @@
 int main()
 {
     std::srand(std::time(nullptr));
-
     Joueur_MonteCarlo_ j("Alex",true);
     size_t i = 0;
-    while (true)
-    {j.montecarlo();}
-
+    while (i< 10000)
+    {
+      j.montecarlo();
+      ++i;
+    }
+    std::cout<<"montecarlo...succes !"<<std::endl;
     j.savetree();
+
+
 
 
 

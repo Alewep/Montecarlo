@@ -32,12 +32,12 @@ public :
         const Node &get() const;
         Node &get();
         void set (int val, int iterations,Brix coup);
-
         Brix getCoup () const;
         bool rightIsNull() const ;
         bool leftIsNull() const;
         int getIterations() const;
         void setIterations(int iterations);
+        void hauteur();
     };
 private:
     Node *_root;
@@ -52,7 +52,6 @@ public:
     const Node &getNodeConst() const;
     bool isnull() const;
     void prefixe () const; // à definir lecture du l'arbre celon l'ordre prefixe (sans recursivité)
-    size_t numberofnodes() const;
 };
 
 

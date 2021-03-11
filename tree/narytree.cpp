@@ -108,33 +108,6 @@ void Narytree::Node::addNode(int val, int iterations, Brix coup, Narytree::Node 
     _sons.push_back(new Node(val,iterations,coup,father));
 }
 
-size_t Narytree::numberofnodes()
-{
-    size_t numberofnodes = 0;
-    if (!isnull()) {
-        std::queue<Node *> q;
-        q.push(_root);
-        _root = nullptr;
-        while (!q.empty()) {
-            Node *node = q.front();
-            q.pop();
-            if(!node->isaleaf()) {
-                for(size_t i = 0;i<node->numberOfsons();++i)
-                {
-                    q.push(&node->getNode(i));
-                }
-            }
-            ++numberofnodes;
-
-        }
-    }
-    return numberofnodes;
-}
-
-
-
-
-
 Narytree::Narytree()
 {
     _root = nullptr;

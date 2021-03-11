@@ -5,42 +5,11 @@ ArbreContigu::ArbreContigu(const std::string &filename)
     values = file_to_vector(filename);
 }
 
-static bool onlynull (std::queue<const Binarytree::Node *> q) {
-    while (!q.empty()) {
-        if(q.front() != nullptr) {
-            return false;
-        }
-        q.pop();
-    }
-    return true;
-}
 
 
 ArbreContigu::ArbreContigu(const Binarytree &b)
 {
-    values.clear();
-    Brix() ;
-    const Binarytree::Node& nb = b.getNodeConst();
-    if (!b.isnull())  {
-        std::queue<const Binarytree::Node *> q;
-        q.push(&nb);
-        while (!q.empty() && !onlynull(q)) {
-            const Binarytree::Node * s = q.front();
-            q.pop();
-            if (s == nullptr) {
-                values.push_back({0,0,true,Brix()});
-                q.push(nullptr);
-                q.push(nullptr);
-            }
-            else {
-                values.push_back({s->getVal(),s->getIterations(),false,s->getCoup()});
-                if (!s->leftIsNull()) q.push(&s->getLeftConst());
-                else q.push(nullptr);
-                if (!s->rightIsNull()) q.push(&s->getRightConst());
-                else q.push(nullptr);
-            }
-        }
-    }
+
 }
 
 std::vector<std::string> ArbreContigu::explode(const std::string &str, char x)

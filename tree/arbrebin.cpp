@@ -229,23 +229,3 @@ void Binarytree::prefixe() const
     }
 }
 
-size_t Binarytree::numberofnodes() const
-{
-    size_t numberofnodes = 0;
-    if (!isnull()) {
-        std::queue<Node *> q;
-        q.push(_root);
-        while(!q.empty())
-        {
-            Node *node = q.front();
-            q.pop();
-            if (!node->leftIsNull())
-                q.push(&node->getLeft());
-            if (!node->rightIsNull())
-                q.push(&node->getRight());
-            ++numberofnodes;
-        }
-
-    }
-    return numberofnodes;
-}

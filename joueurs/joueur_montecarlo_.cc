@@ -78,7 +78,7 @@ Jeu Joueur_MonteCarlo_::etat( const Narytree::Node &node)
     Jeu etat;
     const Narytree::Node * noeudCourant = &node;
     while(noeudCourant->havefather()) {
-        etat.joue(node.getCoup());
+        etat.joue(noeudCourant->getCoup());
         noeudCourant = &noeudCourant->getFatherConst();
     }
     return etat;
@@ -195,6 +195,11 @@ Narytree::Node &Joueur_MonteCarlo_::growth(Narytree::Node &node)
 {
     // creer un nouveau noeud parmis les succeur de l'etat etiquetant la feuille
     std::vector<Brix> cnv = coupsnonvisites(node);
+    //    std::cout<<"--------"<<std::endl;
+    //    if(node.havefather()) std::cout<<etat(node.getFatherConst())<<std::endl;
+    //    else std::cout<<"pas de pere"<<std::endl;
+    //    std::cout<<etat(node)<<std::endl;
+    //    std::cout<<"cnv"<<!cnv.empty()<<std::endl;
     if (!cnv.empty())
     {
         size_t rand_int;

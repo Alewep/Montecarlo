@@ -59,7 +59,6 @@ public:
     bool isnull() const;
     void prefixe() const;
     void toCsv (std::string filename) const;
-    size_t numberofnodes ();
 };
 
 #endif // NARYTREE_H
