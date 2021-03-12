@@ -1,5 +1,6 @@
 #ifndef ARBRECONTIGU_H
 #define ARBRECONTIGU_H
+
 #include <iostream>
 #include <vector>
 #include <string>
@@ -20,7 +21,6 @@ struct element{
 class ArbreContigu
 {
 private:
-    std::vector<element> file_to_vector(const std::string & filename);
     std::vector<std::string> explode(const std::string & str, char x);
 
 public:

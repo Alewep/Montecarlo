@@ -2,65 +2,8 @@
 #include <queue>
 ArbreContigu::ArbreContigu(const std::string &filename)
 {
-    values = file_to_vector(filename);
-}
-
-
-
-ArbreContigu::ArbreContigu(const Binarytree &b)
-{
-    if (!b.isnull()) {
-        std::queue<const Binarytree::Node * > qb;
-        std::queue<size_t> qi;
-        qi.push(1);
-        qb.push(&b.getNodeConst());
-        size_t tailletab = static_cast<size_t>(std::pow(2,(b.hauteur()+1)));
-        //values.reserve(tailletab);
-        for (size_t i = 0;i<tailletab;++i) {
-            try  {
-            values.push_back({0,0,true,Brix()});
-            }
-            catch (...) {
-                std::cout<<i<<std::endl;
-                break;
-            }
-        }
-        while (!qb.empty()) {
-            const Binarytree::Node * nodeb = qb.front();
-            size_t i = qi.front();
-            qb.pop();
-            qi.pop();
-
-            values[i-1] = {nodeb->getVal(),nodeb->getVal(),false,nodeb->getCoup()};
-            if (!nodeb->leftIsNull()) {
-                qb.push(&nodeb->getLeftConst());
-                qi.push(i*2);
-            }
-            if (!nodeb->rightIsNull()) {
-                qb.push(&nodeb->getRightConst());
-                qi.push(i*2+1);
-            }
-        }
-    }
-
-
-}
-
-std::vector<std::string> ArbreContigu::explode(const std::string &str, char x)
-{
-    std::vector<std::string> result;
-    std::istringstream in(str);
-    std::string token;
-    while(getline(in, token, x))
-        result.push_back(token);
-    return result;
-}
-
-
-
-std::vector<element> ArbreContigu::file_to_vector(const std::string &filename)
-{
-    std::vector<element> values;
+    size_t tailletab = static_cast<size_t>(5000000);
+    values.reserve(tailletab);
     std::string line;
     std::ifstream file(filename);
     if(!file){
@@ -86,9 +29,61 @@ std::vector<element> ArbreContigu::file_to_vector(const std::string &filename)
        }
    }
 
-        file.close();
-        return values;
+   file.close();
 }
+
+
+
+ArbreContigu::ArbreContigu(const Binarytree &b)
+{
+    if (!b.isnull()) {
+        std::queue<const Binarytree::Node * > qb;
+        std::queue<size_t> qi;
+        qi.push(1);
+        qb.push(&b.getNodeConst());
+        size_t tailletab = static_cast<size_t>(5000000);
+        values.reserve(tailletab);
+        for (size_t i = 0;i<tailletab;++i) {
+            try  {
+                values.push_back({0,0,true,Brix()});
+            }
+            catch (...) {
+                std::cout<<i<<std::endl;
+                break;
+            }
+        }
+        while (!qb.empty()) {
+            const Binarytree::Node * nodeb = qb.front();
+            size_t i = qi.front();
+            qb.pop();
+            qi.pop();
+            if (values.size() > i-1 )
+                values[i-1] = {nodeb->getVal(),nodeb->getIterations(),false,nodeb->getCoup()};
+            else return;
+            if (!nodeb->leftIsNull()) {
+                qb.push(&nodeb->getLeftConst());
+                qi.push(i*2);
+            }
+            if (!nodeb->rightIsNull()) {
+                qb.push(&nodeb->getRightConst());
+                qi.push(i*2+1);
+            }
+        }
+    }
+
+
+}
+
+std::vector<std::string> ArbreContigu::explode(const std::string &str, char x)
+{
+    std::vector<std::string> result;
+    std::istringstream in(str);
+    std::string token;
+    while(getline(in, token, x))
+        result.push_back(token);
+    return result;
+}
+
 
 void ArbreContigu::to_csv(std::string const & filename){
     std::fstream file;

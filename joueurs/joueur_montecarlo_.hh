@@ -16,6 +16,7 @@ class Joueur_MonteCarlo_ : public Joueur
 private:
     Narytree _tree;
     Narytree::Node * _courant;
+    int tour;
 
 public:
     const static double PONDERATION;
@@ -25,7 +26,7 @@ public:
     //char nom_abbrege() const override;
     void recherche_coup(Jeu j, Brix & coup) override;
     static bool egalBrix (Brix a, Brix b);
-    static Brix getBrixJouer(Jeu fils, Jeu pere);
+    static Brix getBrixJouer(const Jeu &fils, const Jeu &pere);
     static double uperboundconfidence(Narytree::Node& node); // calcule l'uperboundconfidence d'un noeud
     static Jeu etat (const Narytree::Node& node); // renvoie le plateau du jeux correspondant au noeud
     static std::vector<Brix> coupspossible(Jeu jeu); //renvoie un vecteur contenant tout les coups possbile
@@ -33,6 +34,8 @@ public:
     static std::vector<Brix> coupsnonvisites (Narytree::Node& node ); //renvoie le vecteur contenant les coups qui n'ont pas été visité
     static Narytree::Node& maxUBC(Narytree::Node& node); // renvoie parmi les fils du noeud appelé celui qui maximise UBC
 
+    size_t minimisation ();
+    size_t maximsation ();
 
     static Narytree::Node& descent (Narytree::Node& node); // s'arrête sur un noeud d'ont un fils n'a pas encore été exploré
     static Narytree::Node& growth(Narytree::Node& node ); // creer un nouveau noeud parmis les succeur de l'etat etiquetant la feuille
