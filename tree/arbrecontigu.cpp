@@ -2,7 +2,7 @@
 #include <queue>
 ArbreContigu::ArbreContigu(const std::string &filename)
 {
-    size_t tailletab = static_cast<size_t>(5000000);
+    size_t tailletab = static_cast<size_t>(10000000);
     values.reserve(tailletab);
     std::string line;
     std::ifstream file(filename);

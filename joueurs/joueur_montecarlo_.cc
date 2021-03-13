@@ -37,7 +37,7 @@ void Joueur_MonteCarlo_::recherche_coup(Jeu jeu, Brix &coup)
         Brix coupCourant;
 
         for (size_t i = 0;i< _courant->numberOfsons();++i) {
-            Brix coupCourant = _courant->getNode(i).getCoup() ;
+            coupCourant = _courant->getNode(i).getCoup() ;
             if (egalBrix(coupAdverse,coupCourant)) {
                 _courant = & _courant->getNode(i);
                 break;
@@ -49,6 +49,7 @@ void Joueur_MonteCarlo_::recherche_coup(Jeu jeu, Brix &coup)
             _courant = &_courant->getNode(_courant->numberOfsons()-1);
         }
     }
+    std::cout<<"VALUATION"<<_courant->getVal()<<std::endl;
     duration<double, std::milli> ms_int = duration<double, std::milli>(0);
     while (ms_int < temps) {
        //std::cout<<ms_int.count()<<","<<temps.count()<<std::endl;
@@ -61,7 +62,7 @@ void Joueur_MonteCarlo_::recherche_coup(Jeu jeu, Brix &coup)
         size_t better;
         if (joueur()) better = maximsation();
         else better = minimisation();
-        std::cout<<"VALUATION :"<<_courant->getNode(better).getVal()<<";"<<_courant->getNode(better).getIterations();
+        //std::cout<<"VALUATION :"<<_courant->getNode(better).getVal()<<";"<<_courant->getNode(better).getIterations();
         coup = _courant->getNode(better).getCoup();
         _courant = &_courant->getNode(better);
 
@@ -70,6 +71,8 @@ void Joueur_MonteCarlo_::recherche_coup(Jeu jeu, Brix &coup)
     std::cout<<"CRITIQUE"<<std::endl;
     std::vector<Brix> coupValide = coupspossible(jeu);
     coup = coupValide[ static_cast<size_t>(rand()) % coupValide.size()];
+    _courant->addNode(0,0,coup);
+    _courant = &_courant->getNode(_courant->numberOfsons()-1);
     ++tour;
 
 //    ms_int = duration<double, std::milli>(0);
@@ -251,7 +254,7 @@ size_t Joueur_MonteCarlo_::minimisation()
     if (_courant->numberOfsons() > 1 ) {
         for (size_t i = 1;i<_courant->numberOfsons();++i) {
             if (_courant->getNode(i).getIterations() == 0) continue;
-            int currentValue = (_courant->getNode(i).getVal() / _courant->getNode(i).getIterations()) ;
+            int currentValue = (_courant->getNode(i).getVal());
             if ( currentValue < minValue ) {
                 min_indice = i;
                 minValue = currentValue;
@@ -272,7 +275,7 @@ size_t Joueur_MonteCarlo_::maximsation()
         for (size_t i = 1;i<_courant->numberOfsons();++i) {
             if (_courant->getNode(i).getIterations() == 0) continue;
 
-                int currentValue = (_courant->getNode(i).getVal() / _courant->getNode(i).getIterations()) ;
+                int currentValue = (_courant->getNode(i).getVal()) ;
             if ( currentValue >  maxValue ) {
                 max_indice = i;
                 maxValue = currentValue;
