@@ -13,13 +13,11 @@ add_compile_options(-Wall -Wpedantic)
 
 
 set(SRCS
-    arbrebin.cpp
     arbrecontigu.cpp
     narytree.cpp
     )
     
 set(HEADERS
-    arbrebin.h
     arbrecontigu.h
     narytree.h
     )

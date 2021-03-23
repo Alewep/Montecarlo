@@ -1,9 +1,18 @@
 #ifndef NARYTREE_H
 #define NARYTREE_H
 #include <vector>
-#include "arbrebin.h"
 #include "arbrecontigu.h"
 #include <queue>
+#include <arbrecontigu.h>
+#include "../brix.hh"
+
+#include <chrono>
+
+using std::chrono::high_resolution_clock;
+using std::chrono::duration_cast;
+using std::chrono::duration;
+using std::chrono::milliseconds;
+
 class Narytree
 {
 
@@ -11,8 +20,8 @@ public:
     class Node
     {
     private:
-        int _val;
-        int _iterations;
+        long int _val;
+        long int _iterations;
         Brix _coup;
         Node  *_father;
         std::vector<Node *> _sons;
@@ -23,12 +32,12 @@ public:
         ~Node() {}
         bool isaleaf() const;
         bool havefather() const ;
-        int getVal() const;
-        int getIterations () const;
+        long int getVal() const;
+        long int getIterations () const;
         Brix getCoup() const ;
-        void setVal( int val);
+        void setVal( long int val);
         void setCoup(Brix coup);
-        void setIterations(int iterations);
+        void setIterations(long int iterations);
         void setFather (Node &father);
         Node &get();
         const Node &getConst() const;
@@ -40,9 +49,7 @@ public:
         const Node& getFatherConst() const;
         void addNode(int val, int iterations,Brix coup);
         void addNode (int val,int iterations,Brix coup,Node &father);
-
-
-
+        void erase_with_last_swap (size_t i );
     };
 
 private:
@@ -50,15 +57,17 @@ private:
 public:
     Narytree();
     Narytree(int val,int iterations, Brix coup);
-    Narytree(Narytree const& n) = delete;
-    Narytree(Binarytree const& bin); // à définir
+    Narytree(Narytree &n);
+    Narytree(std::string const & filename, duration<double, std::milli> timetocharge);
+    //Narytree(std::string const & filename);
+    void toCsv (std::string const & filename) const;
     ~Narytree();
     Node &getNode();
     const Node &getNodeConst() const;
     void setNode(int val,int iterations, Brix coup);
     bool isnull() const;
     void prefixe() const;
-    void toCsv (std::string filename) const;
+
 
 };
 

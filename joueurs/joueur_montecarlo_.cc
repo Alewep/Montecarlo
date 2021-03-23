@@ -1,15 +1,18 @@
 #include "joueur_montecarlo_.hh"
+
+
 const double Joueur_MonteCarlo_::PONDERATION(2.0);
-
+Narytree Joueur_MonteCarlo_::_tree("tree_montecarlo_OAA.txt",duration<double, std::milli>(18000));
+//Narytree Joueur_MonteCarlo_::_tree("tree_montecarlo_OAA.txt");
 Joueur_MonteCarlo_::Joueur_MonteCarlo_(std::string nom, bool joueur)
-    :Joueur(nom,joueur),_tree(ArbreContigu("tree_montecarlo_OAA.txt")),_courant(&_tree.getNode()),tour(0) {
-
+    :Joueur(nom,joueur),_courant(&_tree.getNode()),tour(0) {
     std::cout<<"succes..."<<std::endl;
 }
 
+
+
 void Joueur_MonteCarlo_::savetree()
 {
-    _tree.prefixe();
     _tree.toCsv("tree_montecarlo_OAA.txt");
     std::cout<<"done";
 }
@@ -23,76 +26,46 @@ void Joueur_MonteCarlo_::savetree()
 */
 void Joueur_MonteCarlo_::recherche_coup(Jeu jeu, Brix &coup)
 {
-
-    using std::chrono::high_resolution_clock;
-    using std::chrono::duration_cast;
-    using std::chrono::duration;
-    using std::chrono::milliseconds;
     auto t1 = high_resolution_clock::now();
-    duration<double, std::milli> temps = duration<double, std::milli>(TEMPS_POUR_UN_COUP - 0.5 );
+    duration<double, std::milli> temps = duration<double, std::milli>(TEMPS_POUR_UN_COUP - 1.5);
     Brix coupAdverse = getBrixJouer(jeu,etat(*_courant));
-
-    if (coupAdverse.getDefinie() == true ) {
-        ++tour;
-        Brix coupCourant;
-
-        for (size_t i = 0;i< _courant->numberOfsons();++i) {
-            coupCourant = _courant->getNode(i).getCoup() ;
-            if (egalBrix(coupAdverse,coupCourant)) {
-                _courant = & _courant->getNode(i);
-                break;
-            }
-
-        }
-        if (!egalBrix(coupAdverse,coupCourant)) {
+    if (coupAdverse.getDefinie()) {
+        int indicecoup = coupPresent(*_courant,coupAdverse);
+        if (indicecoup > 0 )
+            _courant = & _courant->getNode(static_cast<size_t>(indicecoup));
+        else {
             _courant->addNode(0,0,coupAdverse);
             _courant = &_courant->getNode(_courant->numberOfsons()-1);
         }
     }
-    std::cout<<"VALUATION"<<_courant->getVal()<<std::endl;
     duration<double, std::milli> ms_int = duration<double, std::milli>(0);
+    int nbmont=0;
     while (ms_int < temps) {
-       //std::cout<<ms_int.count()<<","<<temps.count()<<std::endl;
+        ++nbmont;
        montecarlo();
        auto t2 = high_resolution_clock::now();
        ms_int = duration<double, std::milli>(t2 - t1);
     }
-
     if (!_courant->isaleaf()) {
-        size_t better;
-        if (joueur()) better = maximsation();
-        else better = minimisation();
-        //std::cout<<"VALUATION :"<<_courant->getNode(better).getVal()<<";"<<_courant->getNode(better).getIterations();
-        coup = _courant->getNode(better).getCoup();
-        _courant = &_courant->getNode(better);
-
+        if (joueur()) _courant = &maximsation(jeu);
+        else _courant = &minimisation(jeu);
+        coup = _courant->getCoup();
         return;
     }
-    std::cout<<"CRITIQUE"<<std::endl;
+    // section critique aucune information
     std::vector<Brix> coupValide = coupspossible(jeu);
     coup = coupValide[ static_cast<size_t>(rand()) % coupValide.size()];
     _courant->addNode(0,0,coup);
     _courant = &_courant->getNode(_courant->numberOfsons()-1);
     ++tour;
 
-//    ms_int = duration<double, std::milli>(0);
-//    while (ms_int <  duration<double, std::milli>(TEMPS_POUR_UN_COUP)) {
-//       montecarlo();
-//       auto t2 = high_resolution_clock::now();
-//       ms_int = duration<double, std::milli>(t2 - t1);
-
-//    }
-
-
-
-
-
 }
 
 bool Joueur_MonteCarlo_::egalBrix(Brix a, Brix b)
 {
     return (a.getAo() ==  b.getAo()) && (a.getAx() == b.getAx())
-            && (a.getOo() == b.getOo()) && (a.getOx() == b.getOx());
+            && (a.getOo() == b.getOo()) && (a.getOx() == b.getOx())
+            && (a.getDefinie() == a.getDefinie());
 }
 
 Brix Joueur_MonteCarlo_::getBrixJouer(const Jeu &fils, const Jeu &pere)
@@ -101,7 +74,6 @@ Brix Joueur_MonteCarlo_::getBrixJouer(const Jeu &fils, const Jeu &pere)
         for(size_t j=0;j<MAX_HAUTEUR;++j) {
             if((fils.plateau()[j][i] != pere.plateau()[j][i]) && pere.plateau()[j][i] == '0' ) {
                 if(fils.plateau()[j][i] == 'o') {
-                    std::cout<<"0"<<std::endl;
                     if (( j > 0 ) && (fils.plateau()[j-1][i] != pere.plateau()[j-1][i]) && (fils.plateau()[j-1][i] == 'x') && pere.plateau()[j-1][i] == '0' )
                         return Brix(static_cast<int>(i),static_cast<int>(j-1),static_cast<int>(i),static_cast<int>(j));
 
@@ -116,7 +88,6 @@ Brix Joueur_MonteCarlo_::getBrixJouer(const Jeu &fils, const Jeu &pere)
                     return Brix();
                 }
                 if (fils.plateau()[j][i] == 'x') {
-                    std::cout<<"X"<<std::endl;
                     if (( j > 0 ) && (fils.plateau()[j-1][i] != pere.plateau()[j-1][i]) && (fils.plateau()[j-1][i] == 'o') && pere.plateau()[j-1][i] == '0' )
                         return Brix(static_cast<int>(i),static_cast<int>(j),static_cast<int>(i),static_cast<int>(j-1));
 
@@ -140,7 +111,7 @@ Brix Joueur_MonteCarlo_::getBrixJouer(const Jeu &fils, const Jeu &pere)
 
 double Joueur_MonteCarlo_::uperboundconfidence(Narytree::Node &node)
 {
-   if(node.getIterations()) return (node.getVal()/node.getIterations()) + sqrt(PONDERATION*(log(node.getFather().getVal())/node.getIterations()));
+   if(node.getIterations() != 0) return (node.getVal()/node.getIterations()) + sqrt(PONDERATION*(log(node.getFather().getVal())/node.getIterations()));
    else return DBL_MAX;
 }
 
@@ -155,7 +126,7 @@ Jeu Joueur_MonteCarlo_::etat( const Narytree::Node &node)
     return etat;
 }
 
-std::vector<Brix> Joueur_MonteCarlo_::coupspossible(Jeu jeu)
+std::vector<Brix> Joueur_MonteCarlo_::coupspossible(Jeu const& jeu)
 {
     std::vector<Brix> coupValide;
     Brix b_canditate;
@@ -208,9 +179,9 @@ bool Joueur_MonteCarlo_::coupvisite(Brix b, Narytree::Node &node)
     return false;
 }
 
-std::vector<Brix> Joueur_MonteCarlo_::coupsnonvisites(Narytree::Node &node)
+std::vector<Brix> Joueur_MonteCarlo_::coupsnonvisites(Narytree::Node &node, Jeu const& jeu)
 {
-    std::vector<Brix> coupValide = coupspossible(etat(node));
+    std::vector<Brix> coupValide = coupspossible(jeu);
     std::vector<Brix> coupnonvisite;
     if ( node.numberOfsons() != 0) {
         for (Brix & e : coupValide) {
@@ -221,12 +192,24 @@ std::vector<Brix> Joueur_MonteCarlo_::coupsnonvisites(Narytree::Node &node)
     return coupValide;
 }
 
+int Joueur_MonteCarlo_::coupPresent(Narytree::Node &node, Brix coup)
+{
+    for (size_t i = 0;i< node.numberOfsons();++i) {
+        Brix coupCourant = node.getNode(i).getCoup() ;
+        if (egalBrix(coup,coupCourant)) {
+            return static_cast<int>(i);
+        }
+
+    }
+    return -1;
+}
+
 Narytree::Node& Joueur_MonteCarlo_::maxUBC(Narytree::Node& node) // renvoie parmi les fils du noeud appelé celui qui maximise UBC
 {
     Narytree::Node * current_node = & node;
-    Narytree::Node * best_child =&current_node->getNode(0);
+    Narytree::Node * best_child = &current_node->getNode(static_cast<size_t>(rand()) % (current_node->numberOfsons() - 1));
     double max = uperboundconfidence(*best_child);
-    for (size_t i=1;i<current_node->numberOfsons();i++)
+    for (size_t i=0;i<current_node->numberOfsons();i++)
     {
         double calcl = uperboundconfidence(current_node->getNode(i));
         if(calcl>max)
@@ -235,62 +218,60 @@ Narytree::Node& Joueur_MonteCarlo_::maxUBC(Narytree::Node& node) // renvoie parm
             max = calcl;
 
         }
-        else if (abs(calcl - max) > 0.000001)
-        {
-           int choix = rand() % 1;
-           if (choix == 0) {
-               best_child = &current_node->getNode(i);
-               max = calcl;
-           }
+        else if (calcl == max) {
+            if (rand ()%1 == 0) {
+                best_child = &current_node->getNode(i);
+                max = calcl;
+            }
+
         }
+
     }
     return *best_child;
 }
 
-size_t Joueur_MonteCarlo_::minimisation()
+
+Narytree::Node& Joueur_MonteCarlo_::minimisation(Jeu const& jeu)
 {
-    size_t min_indice = 0;
-    int minValue = _courant->getNode(0).getVal() / _courant->getNode(0).getIterations();
-    if (_courant->numberOfsons() > 1 ) {
-        for (size_t i = 1;i<_courant->numberOfsons();++i) {
-            if (_courant->getNode(i).getIterations() == 0) continue;
-            int currentValue = (_courant->getNode(i).getVal());
-            if ( currentValue < minValue ) {
-                min_indice = i;
-                minValue = currentValue;
-            }
+    size_t min_indice = static_cast<size_t>(rand())%(_courant->numberOfsons()-1);
+    int minValue = _courant->getNode(min_indice).getVal();
+    for (size_t i = 0;i<_courant->numberOfsons();++i) {
+        if ( _courant->getNode(i).getIterations() == 0 ) continue;
+        int currentValue = (_courant->getNode(i).getVal());
+        if ( currentValue < minValue ) {
+            min_indice = i;
+            minValue = currentValue;
         }
     }
 
-    return min_indice;
+
+    return _courant->getNode(min_indice);
 
 }
 
-size_t Joueur_MonteCarlo_::maximsation()
+Narytree::Node& Joueur_MonteCarlo_::maximsation(Jeu const& jeu)
 {
-    size_t max_indice = 0;
-    int maxValue = _courant->getNode(0).getVal() / _courant->getNode(0).getIterations();
+    size_t max_indice = static_cast<size_t>(rand())%(_courant->numberOfsons()-1);
+    int maxValue = _courant->getNode(max_indice).getVal();
 
-    if (_courant->numberOfsons() > 1 ) {
-        for (size_t i = 1;i<_courant->numberOfsons();++i) {
-            if (_courant->getNode(i).getIterations() == 0) continue;
-
-                int currentValue = (_courant->getNode(i).getVal()) ;
-            if ( currentValue >  maxValue ) {
-                max_indice = i;
-                maxValue = currentValue;
-            }
+    for (size_t i = 0;i<_courant->numberOfsons();++i) {
+        int currentValue = (_courant->getNode(i).getVal()) ;
+        if (_courant->getNode(i).getIterations() == 0) continue;
+        if ( currentValue >  maxValue ) {
+            max_indice = i;
+            maxValue = currentValue;
         }
     }
 
-    return max_indice;
+
+    return _courant->getNode(max_indice);
 }
 
 
 Narytree::Node& Joueur_MonteCarlo_::descent(Narytree::Node& node)
 {
     Narytree::Node * current_node =&node;
-    while ((coupsnonvisites(*current_node).empty()) && (current_node->numberOfsons()>0))
+    while ((coupsnonvisites(*current_node,etat(*current_node)).empty()) && (current_node->numberOfsons()>0))
         current_node = &maxUBC(*current_node);
 
     return *current_node;
@@ -299,19 +280,32 @@ Narytree::Node& Joueur_MonteCarlo_::descent(Narytree::Node& node)
 Narytree::Node &Joueur_MonteCarlo_::growth(Narytree::Node &node)
 {
     // creer un nouveau noeud parmis les succeur de l'etat etiquetant la feuille
-    std::vector<Brix> cnv = coupsnonvisites(node);
-    //    std::cout<<"--------"<<std::endl;
-    //    if(node.havefather()) std::cout<<etat(node.getFatherConst())<<std::endl;
-    //    else std::cout<<"pas de pere"<<std::endl;
-    //    std::cout<<etat(node)<<std::endl;
-    //    std::cout<<"cnv"<<!cnv.empty()<<std::endl;
-    if (!cnv.empty())
+    Jeu jeucourant(etat(node));
+    std::vector<Brix> cnv = coupsnonvisites(node,jeucourant);
+
+    if (!cnv.empty() && !jeucourant.fini())
     {
         size_t rand_int;
         if (cnv.size() != 1) rand_int = static_cast<size_t>(rand () % static_cast<int>(cnv.size() - 1) + 0);
         else rand_int = 0;
         node.addNode(0,0,cnv[rand_int],node);
         return node.getNode(node.numberOfsons()-1);
+    }
+    // pour améliorer montecarlo sur les la fin du jeux
+    else if (jeucourant.fini()) {
+        Brix coup = node.getCoup();
+        if (jeucourant.partie_O()) {
+
+            node.setVal(node.getFather().getIterations()*(-1));
+            node.getFather().setVal(node.getFather().getFather().getIterations()*(-1));
+        }
+        else if (jeucourant.partie_X()) {
+            node.setVal(node.getFather().getIterations());
+            node.getFather().setVal(node.getFather().getFather().getIterations());
+        }
+        else if (jeucourant.partie_nulle())node.setVal(0);
+        node.setCoup(coup);
+
     }
     return node;
 }
@@ -349,21 +343,11 @@ void Joueur_MonteCarlo_::update(Narytree::Node &node, int val)
     nodeCourant->setVal(nodeCourant->getVal()+val);
 }
 
+
 void Joueur_MonteCarlo_::montecarlo()
 {
-    //std::cout<<"test"<<std::endl;
     Narytree::Node& des = descent(*_courant);
     Narytree::Node& gro = growth(des);
     int res = rollout(gro);
     update(gro,res);
-    //std::cout<<"iterations : "<<gro.getIterations()<<std::endl;
 }
-
-
-
-
-
-
-
-
-

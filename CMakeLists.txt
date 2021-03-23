@@ -1,10 +1,12 @@
 cmake_minimum_required(VERSION 3.1.0)
 
 project(Arene_light)
-
 include_directories(tree)
-add_subdirectory(joueurs)
 add_subdirectory(tree)
+
+
+add_subdirectory(joueurs)
+
 find_package(Threads)
 
 set(CMAKE_BUILD_TYPE Debug)

@@ -7,7 +7,9 @@ Arbitre::Arbitre(player player1, player player2, int nombre_parties):
     _nombre_parties(nombre_parties),
     _numero_partie(1),
     _player1(player1),
-    _player2(player2)
+    _player2(player2),
+    _partiePerdu(0),
+    _mutexnonrendu(0)
 {}
 
 void Arbitre::initialisation()
@@ -60,7 +62,7 @@ void Arbitre::initialisation()
             _joueur2 = std::make_shared<Joueur_Random> ("Random",false);
             break;
         case player::RAND2:
-            _joueur2 = std::make_shared<Joueur_Random> ("Aleatoire",false);
+            _joueur2 = std::make_shared<Joueur_Random> ("AL2ATOIR !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!",false);
             break;
         default:
             break;
@@ -89,7 +91,7 @@ int Arbitre::challenge()
                         ((_numero_partie%2)?
                              victoire_joueur_1++
                            :
-                             victoire_joueur_2++ )
+                             victoire_joueur_2++)
                       :
                         (!(_numero_partie%2)?
                              victoire_joueur_1++
@@ -102,7 +104,8 @@ int Arbitre::challenge()
         }
     std::cout << "FIN DU CHALLENGE\n\t"
               << _joueur1->nom()<< " gagne " << ((_numero_partie%2)? victoire_joueur_1 : victoire_joueur_2)
-              << "\n\t"<< _joueur2->nom()<< " gagne " << ((_numero_partie%2) ? victoire_joueur_2 : victoire_joueur_1) << std::endl;
+              << "\n\t"<< _joueur2->nom()<< " gagne " << ((_numero_partie%2) ? victoire_joueur_2 : victoire_joueur_1)
+              <<std::endl<<"mutex :"<<_mutexnonrendu<<std::endl<<"partie perdu :"<<_nombre_parties<< std::endl;
     return 0;
 }
 
@@ -129,12 +132,16 @@ result Arbitre::partie()
             if (!_coups_mutex[_numero_partie-1].try_lock()) {
                     std::cerr <<  std::endl << "mutex non rendu " << std::endl;
                     try_lock = true;
+                    ++_mutexnonrendu;
+                    //throw 0;
                 }
             else if(_coups[_numero_partie-1].getDefinie() == false) {
                     std::cerr << "coup invalide Brix non définie" << std::endl;
+                    //throw 0;
                 }
             else if(!_jeu.coup_licite(_coups[_numero_partie-1],tour)) {
                     std::cerr << "coup invalide " << _coups[_numero_partie-1] << std::endl;
+                    //throw 0;
                 }
 
             thread_joueur.detach();
@@ -152,6 +159,7 @@ result Arbitre::partie()
                         {
                             std::cout << _joueur2->nom() <<" gagne ! Nombre de tours : " << tour << std::endl;
                             return result::O; // joueur jouant en 2eme gagne
+
                         }
                     else
                         {
@@ -173,12 +181,15 @@ result Arbitre::partie()
         }
     else if (_jeu.partie_X())
         {
+
             std::cout << std::endl << _joueur1->nom()  <<" gagne. Nombre de tours : " << tour << std::endl;
+            //if(_numero_partie%2 == 0) throw 0;
             return result::X;
         }
     else if (_jeu.partie_O())
         {
             std::cout << std::endl << _joueur2->nom()  <<" gagne. Nombre de tours : " << tour << std::endl;
+            //if(_numero_partie%2 == 1) throw 0;
             return result::O;
         }
 

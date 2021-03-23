@@ -18,13 +18,13 @@ bool Narytree::Node::havefather() const
     return _father != nullptr;
 }
 
-int Narytree::Node::getVal() const
+long int Narytree::Node::getVal() const
 {
     return _val;
 }
 
 
-int Narytree::Node::getIterations() const
+long int Narytree::Node::getIterations() const
 {
     return _iterations;
 }
@@ -34,7 +34,7 @@ Brix Narytree::Node::getCoup() const
     return _coup;
 }
 
-void Narytree::Node::setVal(int val)
+void Narytree::Node::setVal(long int val)
 {
     _val = val;
 }
@@ -44,7 +44,7 @@ void Narytree::Node::setCoup(Brix coup)
     _coup = coup;
 }
 
-void Narytree::Node::setIterations(int iterations)
+void Narytree::Node::setIterations(long int iterations)
 {
     _iterations = iterations;
 }
@@ -108,42 +108,142 @@ void Narytree::Node::addNode(int val, int iterations, Brix coup, Narytree::Node 
     _sons.push_back(new Node(val,iterations,coup,father));
 }
 
+void Narytree::Node::erase_with_last_swap(size_t i)
+{
+    if (_sons.size() > 1)
+    {
+        std::iter_swap(_sons.begin() + static_cast<long>(i), _sons.end() - 1);
+        _sons.pop_back();
+    }
+    else
+    {
+        _sons.clear();
+    }
+}
+
+
+
 Narytree::Narytree()
 {
     _root = nullptr;
 }
 
-Narytree::Narytree(Binarytree const &bin)
+
+Narytree::Narytree(const std::string &filename, duration<double, std::milli> timetocharge)
+//Narytree::Narytree(const std::string &filename)
+{
+    auto t1 = high_resolution_clock::now();
+    std::string line;
+    std::ifstream file(filename);
+    if(!file){
+        std::cout << "Impossible d'ouvrir le fichier !" << std::endl;
+        setNode(0,0,Brix());
+    }
+    else {
+        getline(file,line);
+        std::vector<std::string> vect_temp = explode(line,';');
+        if (vect_temp.size() == 2 ) {
+            std::cout<<vect_temp[0]<<std::endl;
+            setNode(stoi(vect_temp[0]),stoi(vect_temp[1]),Brix());
+            std::queue<Node *> noeuds;
+            std::queue<size_t> indices;
+            noeuds.push(&getNode());
+            indices.push(0);
+            size_t numeroligne = 0;
+            duration<double, std::milli> ms_int = duration<double, std::milli>(0);
+           while(getline(file,line) && ms_int < timetocharge  ){
+            //while(getline(file,line) ){
+                std::vector<std::string> vect_temp = explode(line,';');
+                if (vect_temp.size() == 7 ) {
+                    ++numeroligne;
+                    std::stringstream sstream(vect_temp[0]);
+                    size_t indicePere;
+                    sstream >> indicePere;
+
+                    while (indices.front() != indicePere){
+                        indices.pop();
+                        noeuds.pop();
+                    }
+                    Node * pere = noeuds.front();
+
+                    pere->addNode(stoi(vect_temp[1]),stoi(vect_temp[2]),Brix(stoi(vect_temp[3]),stoi(vect_temp[4]),stoi(vect_temp[5]),stoi(vect_temp[6])),*pere);
+                    noeuds.push(&pere->getNode(pere->numberOfsons()-1));
+                    indices.push(numeroligne);
+                }
+                else {
+                    setNode(0,0,Brix());
+                    return;
+                }
+                auto t2 = high_resolution_clock::now();
+                ms_int = duration<double, std::milli>(t2 - t1);
+            }
+            std::cout<<"nombre de noeuds chargés:"<< numeroligne;
+        }
+    }
+}
+
+void Narytree::toCsv(std::string const & filename) const
 {
 
-    if(!bin.isnull()) {
-        std::queue< const Binarytree::Node *> qb;
-        std::queue<Node *> qn;
-        qb.push(&bin.getNodeConst());
-        _root = new Node(bin.getNodeConst().getVal(),bin.getNodeConst().getIterations(),bin.getNodeConst().getCoup());
-        qn.push(_root);
-        while(!qb.empty()) {
-            const Binarytree::Node * nb = qb.front();
-            qb.pop();
-            Node *nn = qn.front();
-            qn.pop();
-            if(!nb->leftIsNull()) {
-                qb.push(&nb->getLeftConst());
-                nn->addNode(nb->getLeftConst().getVal(),nb->getIterations(),nb->getLeftConst().getCoup(),*nn);
-                qn.push(&nn->getNode(0));
+    std::fstream file;
+    file.open (filename, std::fstream::trunc | std::fstream::out );
+    if(!file)
+        std::cout << "Impossible d'ouvrir le fichier !" << std::endl;
+    else {
+        if (!isnull()) {
+            //initialisation (noeud racine)
+            const Node * courant = &getNodeConst();
+
+            file<<courant->getVal()<<";"
+            <<courant->getIterations()<<std::endl;
+
+            std::queue<const Node *> noeuds;
+            std::queue<size_t> peresIndices;
+            size_t plusgrand = 0;
+
+            for (size_t i = 0 ; i< getNodeConst().numberOfsons();++i) {
+                noeuds.push(&courant->getNodeConst(i));
+                peresIndices.push(plusgrand);
             }
-            if(!nb->rightIsNull()) {
-                qb.push(&nb->getRightConst());
-                nn->getFather().addNode(nb->getRightConst().getVal(),nb->getRightConst().getIterations(),nb->getRightConst().getCoup(),nn->getFather());
-                qn.push(&nn->getFather().getNode(nn->getFather().numberOfsons()-1));
+            // fin initialisation
+            while (!noeuds.empty()) {
+                const Node * courant = noeuds.front();
+                size_t pere = peresIndices.front();
+                noeuds.pop();
+                peresIndices.pop();
+                ++plusgrand;
+
+                Brix coup = courant->getCoup();
+
+                file<<pere<<";"
+                <<courant->getVal()<<";"
+                <<courant->getIterations()<<";"
+                <<coup.getAx()<<";"
+                <<coup.getOx()<<";"
+                <<coup.getAo()<<";"
+                <<coup.getOo()<<std::endl;
+
+
+                for (size_t i = 0 ; i< courant->numberOfsons();++i) {
+                    noeuds.push(&courant->getNodeConst(i));
+                    peresIndices.push(plusgrand);
+                }
             }
 
         }
+
+
     }
+    file.close();
 
 }
 
 Narytree::Narytree(int val,int iterations, Brix coup ) :_root ( new Node(val,iterations, coup ) ) {}
+
+Narytree::Narytree(Narytree &n)
+{
+    _root = n._root;
+}
 
 
 Narytree::~Narytree()
@@ -180,9 +280,7 @@ const Narytree::Node &Narytree::getNodeConst() const
 
 void Narytree::setNode(int val, int iterations, Brix coup)
 {
-    _root->setVal(val);
-    _root->setIterations(iterations);
-    _root->setCoup(coup);
+    _root = new Node(val,iterations,coup);
 
 }
 
@@ -210,16 +308,6 @@ void Narytree::prefixe() const
             std::cout<<node->getVal()<<std::endl;
         }
     }
-}
-
-void Narytree::toCsv(std::string filename) const
-{
-
-    Binarytree b (*this);
-    this->~Narytree();
-    std::cout<<b.hauteur()<<std::endl;
-    ArbreContigu c (b);
-    c.to_csv(filename);
 }
 
 
